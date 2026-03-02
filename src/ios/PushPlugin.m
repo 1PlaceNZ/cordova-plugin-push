@@ -282,6 +282,18 @@
         }
 
         if (silent == 1) {
+            // Check if notification has visible alert content
+            id alert = [aps objectForKey:@"alert"];
+            BOOL hasVisibleContent = (alert != nil && ![alert isEqual:[NSNull null]]);
+
+            if (hasVisibleContent) {
+                // Notification has visible alert content along with content-available.
+                // Skip here to avoid duplicate in-app notification events.
+                NSLog(@"[PushPlugin] Silent push with visible content - skipping to avoid duplicate notification event.");
+                completionHandler(UIBackgroundFetchResultNewData);
+                return;
+            }
+
             NSLog(@"[PushPlugin] this should be a silent push");
             void (^safeHandler)(UIBackgroundFetchResult) = ^(UIBackgroundFetchResult result){
                 dispatch_async(dispatch_get_main_queue(), ^{
